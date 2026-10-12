@@ -78,7 +78,7 @@ const upload = multer({
   (mime.startsWith("image/") && ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(mime)) ||
   ["application/pdf", "application/x-pdf"].includes(mime) ||
   ["video/webm", "video/mp4", "video/quicktime", "video/x-m4v"].includes(mime);
-    if (!validExt || !validMime) return cb(new Error("Unsupported file type. Upload a video, JPG/PNG/WebP image, or PDF."));
+    console.log("Upload MIME check:", { ext, mime, validExt, validMime });if (!validExt || !validMime) return cb(new Error("Unsupported file type. Upload a video, JPG/PNG/WebP image, or PDF."));
     cb(null, true);
   }
 });
