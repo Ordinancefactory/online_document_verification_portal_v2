@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#12385a">
+<title>Online Document Verification Portal</title>
+<link rel="stylesheet" href="/styles.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">✓</div><div><h1>Online Document Verification Portal</h1><p>Private organisational submission service</p></div></div>
+  <span class="secure-tag"><span class="secure-dot"></span> Restricted access</span>
+</header>
+<main class="shell">
+  <section class="intro">
+    <div><p class="eyebrow">APPLICANT SUBMISSION</p><h2>Verify your documents remotely</h2><p class="intro-copy">Complete your details, record a short verification video, add your supporting documents, and submit them for later review by the organisation.</p></div>
+    <div class="intro-icon">▤</div>
+  </section>
+  <div class="privacy-note"><strong>Before you begin:</strong> Use this portal only if your organisation has provided its access code. Your video and documents will be stored on the organisation's configured server for review. Do not submit passwords, PINs, or unrelated sensitive information.</div>
+
+  <section class="card access-card" id="accessPanel">
+    <div class="section-heading"><span class="number">0</span><div><h3>Organisation access</h3><p>Enter the private access code supplied by your organisation.</p></div></div>
+    <label for="accessCode">Portal access code</label>
+    <div class="access-row"><input id="accessCode" type="password" autocomplete="current-password" placeholder="Enter access code"><button class="button primary" id="unlockBtn">Continue</button></div>
+    <p class="field-hint" id="accessMessage" role="status"></p>
+  </section>
+
+  <form id="verificationForm" hidden>
+    <div class="stepbar"><div class="step active"><span>1</span> Details</div><div class="step"><span>2</span> Record video</div><div class="step"><span>3</span> Documents</div><div class="step"><span>4</span> Submit</div></div>
+    <div class="content-grid">
+      <div class="main-column">
+        <section class="card">
+          <div class="section-heading"><span class="number">1</span><div><h3>Applicant details</h3><p>Enter the information associated with your verification request.</p></div></div>
+          <div class="form-grid">
+            <div class="field full"><label for="fullName">Full name <em>*</em></label><input id="fullName" name="fullName" maxlength="150" required autocomplete="name" placeholder="As shown on your document"></div>
+            <div class="field"><label for="referenceId">Application / reference ID <em>*</em></label><input id="referenceId" name="referenceId" maxlength="100" required placeholder="Provided by the organisation"></div>
+            <div class="field"><label for="documentType">Document type <em>*</em></label><select id="documentType" name="documentType" required><option value="">Select document</option><option>Government photo ID</option><option>Passport</option><option>Driving licence</option><option>Educational certificate</option><option>Address proof</option><option>Other supporting document</option></select></div>
+            <div class="field full"><label for="purpose">Verification purpose <em>*</em></label><select id="purpose" name="purpose" required><option>Identity verification</option><option>Employment / onboarding</option><option>Education verification</option><option>Address verification</option><option>Other</option></select></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-heading"><span class="number">2</span><div><h3>Record your verification video</h3><p>Keep your face visible, read the displayed code aloud, and follow any instructions provided by your organisation.</p></div></div>
+          <div class="camera-frame">
+            <video id="liveVideo" autoplay muted playsinline hidden></video>
+            <div class="camera-empty" id="cameraEmpty"><div class="camera-symbol">◉</div><strong>Camera preview</strong><span>Camera and microphone access is required to record your video.</span></div>
+          </div>
+          <div class="camera-status"><span class="status-dot" id="cameraDot"></span><span id="cameraStatus">Camera not started</span></div>
+          <div class="toolbar">
+            <label class="compact-label" for="cameraFacing">Camera</label><select id="cameraFacing" class="compact-select"><option value="user">Front camera</option><option value="environment">Back camera</option></select>
+            <button type="button" class="button primary" id="startCamera">Start camera</button><button type="button" class="button light" id="switchCamera">Switch</button>
+          </div>
+          <div class="code-panel"><div class="code-caption">YOUR ONE-TIME SESSION CODE</div><div id="verificationCode" class="verification-code">— — — — — —</div><p>Say your full name, reference ID, and this code clearly in the recording.</p><button type="button" id="refreshCode" class="text-button">Generate a new code</button></div>
+          <div class="toolbar record-toolbar"><button type="button" class="button record" id="startRecording" disabled>● Start recording</button><button type="button" class="button light" id="stopRecording" disabled>Stop recording</button><span id="recordTimer" class="timer">00:00</span></div>
+          <p class="field-hint" id="recordStatus" role="status">No video recorded yet.</p>
+          <div id="recordedPreviewWrap" class="recorded-preview" hidden><video id="recordedPreview" controls playsinline></video><button type="button" class="text-button" id="redoRecording">Discard and record again</button></div>
+        </section>
+
+        <section class="card">
+          <div class="section-heading"><span class="number">3</span><div><h3>Supporting documents</h3><p>Upload clear, readable images or PDF files. Keep the complete document and all edges visible.</p></div></div>
+          <label class="upload-zone" for="documents"><span class="upload-icon">↑</span><strong>Choose document files</strong><span>PDF, JPG, PNG or WebP · up to 10 files</span><span class="button light">Browse files</span></label>
+          <input type="file" id="documents" name="documents" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" multiple hidden>
+          <div id="documentList" class="document-list"><p class="empty-files">No files selected.</p></div>
+          <p class="field-hint">Maximum upload size is configured by the organisation. Do not upload documents you were not asked to provide.</p>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="card checklist-card">
+          <h3>Submission checklist</h3><p class="side-copy">Your submission can be sent after all required items are complete.</p>
+          <ul class="checklist" id="checklist">
+            <li data-check="details"><span>○</span> Applicant details</li><li data-check="video"><span>○</span> Video recorded</li><li data-check="docs"><span>○</span> Documents attached</li><li data-check="consent"><span>○</span> Consent confirmed</li>
+          </ul>
+        </section>
+        <section class="card">
+          <div class="section-heading"><span class="number">4</span><div><h3>Consent and declaration</h3><p>Read both statements before submitting.</p></div></div>
+          <label class="consent-item"><input type="checkbox" id="consent" required><span>I consent to the recording and submission of this video and my supporting documents for the verification purpose described above.</span></label>
+          <label class="consent-item"><input type="checkbox" id="declaration" required><span>I confirm that the information and documents submitted are accurate and relate to the person being verified.</span></label>
+          <p class="field-hint">The organisation should provide its privacy notice, retention period, and contact details before using this service with real applicants.</p>
+        </section>
+        <section class="card submit-card">
+          <h3>Ready to submit?</h3><p class="side-copy">Your evidence will be uploaded to the configured private server for later review.</p>
+          <div class="summary-line"><span>Video</span><strong id="videoSummary">Not recorded</strong></div><div class="summary-line"><span>Documents</span><strong id="docsSummary">0 attached</strong></div>
+          <button class="button primary submit-button" id="submitBtn" type="submit">Submit for verification</button>
+          <p id="submitMessage" class="submit-message" role="status" aria-live="polite"></p>
+        </section>
+      </aside>
+    </div>
+  </form>
+  <section id="successPanel" class="card success-panel" hidden>
+    <div class="success-icon">✓</div><p class="eyebrow">SUBMISSION RECEIVED</p><h2>Your documents have been submitted</h2><p>Your evidence is saved for later review. Keep the submission reference below for your records.</p><div class="receipt" id="receiptId"></div><button class="button light" id="downloadReceipt">Download receipt</button>
+  </section>
+  <footer><span>Online Document Verification Portal</span><span>Private organisational service</span></footer>
+</main>
+</body>
+</html>
