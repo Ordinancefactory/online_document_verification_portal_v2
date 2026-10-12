@@ -62,7 +62,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
     const safeExt = allowedExt.has(ext) ? ext : ".bin";
-    const prefix = file.fieldname === "video" ? "verification-video" :
+    const prefix = file.fieldname === "video" ? "verification-video" :const validMime = /^(video\/(webm|mp4|quicktime)|image\/(jpeg|png|webp)|application\/pdf)$/.test(mime)
       file.fieldname === "documents" ? "document" : "evidence";
     cb(null, `${prefix}-${crypto.randomBytes(6).toString("hex")}${safeExt}`);
   }
@@ -74,7 +74,10 @@ const upload = multer({
     const ext = path.extname(file.originalname || "").toLowerCase();
     const mime = String(file.mimetype || "").toLowerCase();
     const validExt = allowedExt.has(ext);
-    const validMime = /^(video\/(webm|mp4|quicktime)|image\/(jpeg|png|webp)|application\/pdf)$/.test(mime);
+    const validMime =
+  (mime.startsWith("image/") && ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(mime)) ||
+  ["application/pdf", "application/x-pdf"].includes(mime) ||
+  ["video/webm", "video/mp4", "video/quicktime", "video/x-m4v"].includes(mime);
     if (!validExt || !validMime) return cb(new Error("Unsupported file type. Upload a video, JPG/PNG/WebP image, or PDF."));
     cb(null, true);
   }
