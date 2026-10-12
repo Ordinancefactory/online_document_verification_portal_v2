@@ -59,28 +59,41 @@ const storage = multer.diskStorage({
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: (req, file, cb) => {
+  
+filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
     const safeExt = allowedExt.has(ext) ? ext : ".bin";
-    const prefix = file.fieldname === "video" ? "verification-video" :const validMime = /^(video\/(webm|mp4|quicktime)|image\/(jpeg|png|webp)|application\/pdf)$/.test(mime)
+    const prefix = file.fieldname === "video" ? "verification-video" :
       file.fieldname === "documents" ? "document" : "evidence";
+    cb(null, `${prefix}-${crypto.randomBytes(6).toString("hex")}${safeExt}`);
+  }
+});
+
     cb(null, `${prefix}-${crypto.randomBytes(6).toString("hex")}${safeExt}`);
   }
 });
 const upload = multer({
   storage,
   limits: { fileSize: MAX_FILE_BYTES, files: 11, fields: 20, fieldSize: 10000 },
-  fileFilter: (req, file, cb) => {
+  
+fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
     const mime = String(file.mimetype || "").toLowerCase();
     const validExt = allowedExt.has(ext);
     const validMime =
-  (mime.startsWith("image/") && ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(mime)) ||
-  ["application/pdf", "application/x-pdf"].includes(mime) ||
-  ["video/webm", "video/mp4", "video/quicktime", "video/x-m4v"].includes(mime);
-    console.log("Upload MIME check:", { ext, mime, validExt, validMime });if (!validExt || !validMime) return cb(new Error("Unsupported file type. Upload a video, JPG/PNG/WebP image, or PDF."));
+      (mime.startsWith("image/") && ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(mime)) ||
+      ["application/pdf", "application/x-pdf"].includes(mime) ||
+      ["video/webm", "video/mp4", "video/quicktime", "video/x-m4v"].includes(mime);
+
+    console.log("Upload MIME check:", { ext, mime, validExt, validMime });
+
+    if (!validExt || !validMime) {
+      return cb(new Error("Unsupported file type. Upload a video, JPG/PNG/WebP image, or PDF."));
+    }
+
     cb(null, true);
   }
+
 });
 
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "Online Document Verification Portal" }));
